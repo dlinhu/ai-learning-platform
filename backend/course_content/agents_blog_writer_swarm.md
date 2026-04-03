@@ -29,6 +29,59 @@ swarm = [researcher, writer, editor]
 
 ---
 
+### 2. 工作流编排 / Workflow Orchestration
+
+**English:** Define workflow between agents, including the complete process of research, writing, editing, and publishing.
+
+**中文:** 定义Agent之间的工作流程，包括研究、写作、编辑和发布的完整流程。
+
+**Key Concepts / 核心概念:**
+- Pipeline execution / 流水线执行
+- Handoff mechanism / 交接机制
+- State transition / 状态转换
+
+**Example / 示例:**
+```python
+def create_blog_workflow():
+    workflow = StateGraph(BlogState)
+    workflow.add_node('research', research_node)
+    workflow.add_node('outline', outline_node)
+    workflow.add_node('write', write_node)
+    workflow.add_node('edit', edit_node)
+    workflow.add_edge('research', 'outline')
+    workflow.add_edge('outline', 'write')
+    workflow.add_edge('write', 'edit')
+    return workflow.compile()
+# → Define blog writing workflow
+
+```
+
+---
+
+### 3. 内容质量控制 / Content Quality Control
+
+**English:** Use editor agent for content review, grammar checking, and quality assurance.
+
+**中文:** 通过编辑Agent进行内容审核、语法检查和质量保证。
+
+**Key Concepts / 核心概念:**
+- Content review / 内容审核
+- Grammar check / 语法检查
+- Style consistency / 风格一致性
+
+**Example / 示例:**
+```python
+def edit_content(draft: str) -> str:
+    issues = check_grammar(draft)
+    style_issues = check_style(draft, style_guide)
+    edited = llm.invoke(f'Edit this draft, fix issues: {issues + style_issues}\nDraft: {draft}')
+    return edited
+# → Edit and quality control content
+
+```
+
+---
+
 ## Summary / 总结
 
 This lesson covered key AI Agent concepts. Practice these techniques to build better intelligent systems.

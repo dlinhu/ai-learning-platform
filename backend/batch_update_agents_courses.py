@@ -350,13 +350,33 @@ AGENTS_COURSES_DATA = {
                 "importance": 3,
                 "key_concepts": ["Inquiry classification / 咨询分类", "Auto-response / 自动回复", "Escalation / 升级处理"],
                 "examples": [{"title": "Inquiry Handling", "prompt": "classification = classify_inquiry(customer_message)\nif classification == 'simple':\n    response = auto_respond(customer_message)\nelse:\n    escalate_to_human(customer_message)", "response": "Classify and handle customer inquiry"}]
+            },
+            {
+                "title": "多轮对话管理 / Multi-turn Conversation Management",
+                "description": "使用LangGraph状态管理实现多轮对话，保持上下文一致性。",
+                "description_en": "Use LangGraph state management to implement multi-turn conversations and maintain context consistency.",
+                "importance": 3,
+                "key_concepts": ["State persistence / 状态持久化", "Context tracking / 上下文跟踪", "Conversation flow / 对话流程"],
+                "examples": [{"title": "Multi-turn State", "prompt": "class SupportState(TypedDict):\n    messages: List[Message]\n    customer_id: str\n    issue_type: str\n    resolution_attempts: int\n\nworkflow.add_node('classify', classify_node)\nworkflow.add_node('respond', respond_node)\nworkflow.add_node('escalate', escalate_node)", "response": "Define support workflow state and nodes"}]
+            },
+            {
+                "title": "知识库集成 / Knowledge Base Integration",
+                "description": "集成知识库和FAQ系统，提供准确的自动回复。",
+                "description_en": "Integrate knowledge base and FAQ systems to provide accurate automated responses.",
+                "importance": 2,
+                "key_concepts": ["RAG retrieval / RAG检索", "FAQ matching / FAQ匹配", "Document search / 文档搜索"],
+                "examples": [{"title": "Knowledge Retrieval", "prompt": "relevant_docs = knowledge_base.search(customer_query, top_k=3)\ncontext = '\\n'.join([doc.content for doc in relevant_docs])\nresponse = llm.invoke(f'Context: {context}\\nQuestion: {customer_query}')", "response": "Retrieve and use knowledge base for response"}]
             }
         ],
         "terms": [
-            {"term": "Customer Support Agent", "term_cn": "客户支持Agent", "definition": "处理客户咨询的AI Agent", "definition_en": "AI agent handling customer inquiries"}
+            {"term": "Customer Support Agent", "term_cn": "客户支持Agent", "definition": "处理客户咨询的AI Agent", "definition_en": "AI agent handling customer inquiries"},
+            {"term": "Escalation", "term_cn": "升级处理", "definition": "将复杂问题转交给人工客服", "definition_en": "Transferring complex issues to human agents"},
+            {"term": "Knowledge Base", "term_cn": "知识库", "definition": "存储产品信息和FAQ的数据库", "definition_en": "Database storing product information and FAQs"}
         ],
         "questions": [
-            {"kp_index": 0, "type": "single_choice", "question": "客户支持Agent如何处理复杂咨询？", "options": ["A. 忽略", "B. 自动回复", "C. 升级给人工", "D. 删除"], "answer": "C", "explanation": "复杂咨询会被升级给人工客服处理。", "difficulty": 1}
+            {"kp_index": 0, "type": "single_choice", "question": "客户支持Agent如何处理复杂咨询？", "options": ["A. 忽略", "B. 自动回复", "C. 升级给人工", "D. 删除"], "answer": "C", "explanation": "复杂咨询会被升级给人工客服处理。", "difficulty": 1},
+            {"kp_index": 1, "type": "true_false", "question": "LangGraph可以用于管理多轮对话状态。", "answer": "正确", "explanation": "LangGraph的状态管理功能可以跟踪多轮对话的上下文。", "difficulty": 1},
+            {"kp_index": 2, "type": "single_choice", "question": "知识库集成通常使用什么技术进行文档检索？", "options": ["A. 关键词匹配", "B. RAG检索", "C. 随机选择", "D. 固定模板"], "answer": "B", "explanation": "RAG（检索增强生成）是常用的知识库检索技术。", "difficulty": 1}
         ]
     },
     "research_team_autogen.ipynb": {
@@ -370,13 +390,33 @@ AGENTS_COURSES_DATA = {
                 "importance": 3,
                 "key_concepts": ["AutoGen / AutoGen框架", "Multi-agent conversation / 多Agent对话", "Assistant Agent / 助手Agent"],
                 "examples": [{"title": "AutoGen Setup", "prompt": "assistant = AssistantAgent('assistant', llm_config=llm_config)\nuser_proxy = UserProxyAgent('user_proxy', code_execution_config=...)\nuser_proxy.initiate_chat(assistant, message='Research topic...')", "response": "Set up AutoGen agents for research"}]
+            },
+            {
+                "title": "Agent角色定义 / Agent Role Definition",
+                "description": "定义不同角色的Agent，如研究员、评论家、撰稿人等，实现专业化分工。",
+                "description_en": "Define agents with different roles such as researcher, critic, and writer for specialized division of labor.",
+                "importance": 3,
+                "key_concepts": ["Role specialization / 角色专业化", "System messages / 系统消息", "Agent persona / Agent人设"],
+                "examples": [{"title": "Role Definition", "prompt": "researcher = AssistantAgent(\n    'researcher',\n    system_message='You are a research specialist. Find and analyze information.',\n    llm_config=llm_config\n)\ncritic = AssistantAgent(\n    'critic',\n    system_message='You are a critical reviewer. Provide constructive feedback.',\n    llm_config=llm_config\n)", "response": "Define specialized agent roles"}]
+            },
+            {
+                "title": "群组对话管理 / Group Chat Management",
+                "description": "使用GroupChat管理多个Agent之间的对话流程和轮次。",
+                "description_en": "Use GroupChat to manage conversation flow and turns between multiple agents.",
+                "importance": 2,
+                "key_concepts": ["GroupChat / 群组对话", "Speaker selection / 发言者选择", "Round-robin / 轮流发言"],
+                "examples": [{"title": "Group Chat", "prompt": "groupchat = GroupChat(\n    agents=[researcher, writer, critic],\n    messages=[],\n    max_round=10\n)\nmanager = GroupChatManager(groupchat=groupchat)\nuser_proxy.initiate_chat(manager, message='Research topic...')", "response": "Set up group chat for multi-agent collaboration"}]
             }
         ],
         "terms": [
-            {"term": "AutoGen", "term_cn": "AutoGen框架", "definition": "Microsoft的多Agent对话框架", "definition_en": "Microsoft's multi-agent conversation framework"}
+            {"term": "AutoGen", "term_cn": "AutoGen框架", "definition": "Microsoft的多Agent对话框架", "definition_en": "Microsoft's multi-agent conversation framework"},
+            {"term": "AssistantAgent", "term_cn": "助手Agent", "definition": "AutoGen中的AI助手角色", "definition_en": "AI assistant role in AutoGen"},
+            {"term": "GroupChat", "term_cn": "群组对话", "definition": "管理多Agent对话的组件", "definition_en": "Component managing multi-agent conversations"}
         ],
         "questions": [
-            {"kp_index": 0, "type": "single_choice", "question": "AutoGen是哪个公司开发的？", "options": ["A. Google", "B. Microsoft", "C. OpenAI", "D. Meta"], "answer": "B", "explanation": "AutoGen是Microsoft开发的多Agent对话框架。", "difficulty": 1}
+            {"kp_index": 0, "type": "single_choice", "question": "AutoGen是哪个公司开发的？", "options": ["A. Google", "B. Microsoft", "C. OpenAI", "D. Meta"], "answer": "B", "explanation": "AutoGen是Microsoft开发的多Agent对话框架。", "difficulty": 1},
+            {"kp_index": 1, "type": "true_false", "question": "AutoGen支持定义不同角色的Agent进行专业化分工。", "answer": "正确", "explanation": "AutoGen可以通过system_message定义不同角色的Agent。", "difficulty": 1},
+            {"kp_index": 2, "type": "single_choice", "question": "GroupChat的作用是什么？", "options": ["A. 生成代码", "B. 管理多Agent对话流程", "C. 存储数据", "D. 调用API"], "answer": "B", "explanation": "GroupChat用于管理多个Agent之间的对话流程和轮次。", "difficulty": 1}
         ]
     },
     "blog_writer_swarm.ipynb": {
@@ -390,13 +430,33 @@ AGENTS_COURSES_DATA = {
                 "importance": 2,
                 "key_concepts": ["Swarm pattern / 群体模式", "Task distribution / 任务分配", "Collaborative writing / 协作写作"],
                 "examples": [{"title": "Swarm Writing", "prompt": "researcher = Agent('researcher', 'Research topics')\nwriter = Agent('writer', 'Write content')\neditor = Agent('editor', 'Edit and polish')\nswarm = [researcher, writer, editor]", "response": "Create swarm of writing agents"}]
+            },
+            {
+                "title": "工作流编排 / Workflow Orchestration",
+                "description": "定义Agent之间的工作流程，包括研究、写作、编辑和发布的完整流程。",
+                "description_en": "Define workflow between agents, including the complete process of research, writing, editing, and publishing.",
+                "importance": 3,
+                "key_concepts": ["Pipeline execution / 流水线执行", "Handoff mechanism / 交接机制", "State transition / 状态转换"],
+                "examples": [{"title": "Workflow Definition", "prompt": "def create_blog_workflow():\n    workflow = StateGraph(BlogState)\n    workflow.add_node('research', research_node)\n    workflow.add_node('outline', outline_node)\n    workflow.add_node('write', write_node)\n    workflow.add_node('edit', edit_node)\n    workflow.add_edge('research', 'outline')\n    workflow.add_edge('outline', 'write')\n    workflow.add_edge('write', 'edit')\n    return workflow.compile()", "response": "Define blog writing workflow"}]
+            },
+            {
+                "title": "内容质量控制 / Content Quality Control",
+                "description": "通过编辑Agent进行内容审核、语法检查和质量保证。",
+                "description_en": "Use editor agent for content review, grammar checking, and quality assurance.",
+                "importance": 2,
+                "key_concepts": ["Content review / 内容审核", "Grammar check / 语法检查", "Style consistency / 风格一致性"],
+                "examples": [{"title": "Quality Control", "prompt": "def edit_content(draft: str) -> str:\n    issues = check_grammar(draft)\n    style_issues = check_style(draft, style_guide)\n    edited = llm.invoke(f'Edit this draft, fix issues: {issues + style_issues}\\nDraft: {draft}')\n    return edited", "response": "Edit and quality control content"}]
             }
         ],
         "terms": [
-            {"term": "Swarm", "term_cn": "群体", "definition": "多个Agent协作完成任务的架构", "definition_en": "Architecture where multiple agents collaborate to complete tasks"}
+            {"term": "Swarm", "term_cn": "群体", "definition": "多个Agent协作完成任务的架构", "definition_en": "Architecture where multiple agents collaborate to complete tasks"},
+            {"term": "Workflow Orchestration", "term_cn": "工作流编排", "definition": "协调多个Agent执行顺序的机制", "definition_en": "Mechanism coordinating execution order of multiple agents"},
+            {"term": "Handoff", "term_cn": "交接", "definition": "Agent之间传递任务和上下文的过程", "definition_en": "Process of passing tasks and context between agents"}
         ],
         "questions": [
-            {"kp_index": 0, "type": "single_choice", "question": "Swarm架构中Agent如何协作？", "options": ["A. 竞争", "B. 各自独立", "C. 协作分工", "D. 随机"], "answer": "C", "explanation": "Swarm架构中Agent协作分工，每个负责不同阶段。", "difficulty": 1}
+            {"kp_index": 0, "type": "single_choice", "question": "Swarm架构中Agent如何协作？", "options": ["A. 竞争", "B. 各自独立", "C. 协作分工", "D. 随机"], "answer": "C", "explanation": "Swarm架构中Agent协作分工，每个负责不同阶段。", "difficulty": 1},
+            {"kp_index": 1, "type": "true_false", "question": "工作流编排定义了Agent之间的执行顺序。", "answer": "正确", "explanation": "工作流编排协调Agent的执行顺序和任务交接。", "difficulty": 1},
+            {"kp_index": 2, "type": "single_choice", "question": "编辑Agent的主要职责是什么？", "options": ["A. 研究主题", "B. 内容质量控制", "C. 发布文章", "D. 设计图片"], "answer": "B", "explanation": "编辑Agent负责内容审核、语法检查和质量保证。", "difficulty": 1}
         ]
     },
     "essay_grading_system_langgraph.ipynb": {
@@ -410,13 +470,33 @@ AGENTS_COURSES_DATA = {
                 "importance": 2,
                 "key_concepts": ["Content analysis / 内容分析", "Multi-dimensional evaluation / 多维评估", "Automated feedback / 自动反馈"],
                 "examples": [{"title": "Grading Flow", "prompt": "essay_analysis = analyze_essay(essay)\nscores = evaluate_dimensions(essay_analysis)\nfeedback = generate_feedback(scores)", "response": "Automated essay grading process"}]
+            },
+            {
+                "title": "评分维度设计 / Scoring Dimensions Design",
+                "description": "设计多个评分维度，如内容、结构、语法、创意等，实现全面评估。",
+                "description_en": "Design multiple scoring dimensions such as content, structure, grammar, and creativity for comprehensive evaluation.",
+                "importance": 3,
+                "key_concepts": ["Rubric design / 评分标准设计", "Dimension weights / 维度权重", "Scoring criteria / 评分准则"],
+                "examples": [{"title": "Scoring Dimensions", "prompt": "scoring_rubric = {\n    'content': {'weight': 0.4, 'criteria': 'Depth and accuracy of content'},\n    'structure': {'weight': 0.25, 'criteria': 'Organization and flow'},\n    'grammar': {'weight': 0.2, 'criteria': 'Language correctness'},\n    'creativity': {'weight': 0.15, 'criteria': 'Originality and creativity'}\n}\nfinal_score = sum(score[dim] * rubric[dim]['weight'] for dim in rubric)", "response": "Define scoring rubric with dimensions and weights"}]
+            },
+            {
+                "title": "反馈生成 / Feedback Generation",
+                "description": "根据评分结果生成详细的改进建议和具体反馈。",
+                "description_en": "Generate detailed improvement suggestions and specific feedback based on scoring results.",
+                "importance": 2,
+                "key_concepts": ["Constructive feedback / 建设性反馈", "Improvement suggestions / 改进建议", "Example corrections / 示例修正"],
+                "examples": [{"title": "Feedback Generation", "prompt": "def generate_detailed_feedback(scores, essay):\n    feedback = {}\n    for dimension, score in scores.items():\n        if score < 0.7:\n            feedback[dimension] = llm.invoke(\n                f'Provide specific improvement suggestions for {dimension}. '\n                f'Current score: {score}. Essay excerpt: {essay[:500]}'\n            )\n    return feedback", "response": "Generate detailed feedback for low-scoring dimensions"}]
             }
         ],
         "terms": [
-            {"term": "Automated Grading", "term_cn": "自动评分", "definition": "使用AI自动评估和评分", "definition_en": "Using AI for automatic evaluation and scoring"}
+            {"term": "Automated Grading", "term_cn": "自动评分", "definition": "使用AI自动评估和评分", "definition_en": "Using AI for automatic evaluation and scoring"},
+            {"term": "Rubric", "term_cn": "评分标准", "definition": "定义评分维度和准则的标准", "definition_en": "Standard defining scoring dimensions and criteria"},
+            {"term": "Multi-dimensional Evaluation", "term_cn": "多维评估", "definition": "从多个角度评估论文质量", "definition_en": "Evaluating essay quality from multiple perspectives"}
         ],
         "questions": [
-            {"kp_index": 0, "type": "true_false", "question": "论文评分系统可以评估多个维度。", "answer": "正确", "explanation": "论文评分系统可以评估内容、结构、语法等多个维度。", "difficulty": 1}
+            {"kp_index": 0, "type": "true_false", "question": "论文评分系统可以评估多个维度。", "answer": "正确", "explanation": "论文评分系统可以评估内容、结构、语法等多个维度。", "difficulty": 1},
+            {"kp_index": 1, "type": "single_choice", "question": "评分维度设计中的权重有什么作用？", "options": ["A. 装饰", "B. 计算最终分数", "C. 增加复杂度", "D. 无作用"], "answer": "B", "explanation": "权重用于计算各维度的加权总分。", "difficulty": 1},
+            {"kp_index": 2, "type": "single_choice", "question": "反馈生成应该针对哪些维度？", "options": ["A. 所有维度", "B. 只有高分维度", "C. 低分维度", "D. 随机维度"], "answer": "C", "explanation": "反馈应重点针对低分维度提供改进建议。", "difficulty": 1}
         ]
     },
     "scientific_paper_agent_langgraph.ipynb": {
@@ -430,13 +510,33 @@ AGENTS_COURSES_DATA = {
                 "importance": 2,
                 "key_concepts": ["Paper parsing / 论文解析", "Key extraction / 关键提取", "Summary generation / 摘要生成"],
                 "examples": [{"title": "Paper Analysis", "prompt": "sections = parse_paper(paper_content)\nkey_findings = extract_key_findings(sections)\nsummary = generate_summary(key_findings)", "response": "Analyze scientific paper"}]
+            },
+            {
+                "title": "PDF文档处理 / PDF Document Processing",
+                "description": "使用工具解析PDF格式的科学论文，提取文本和结构信息。",
+                "description_en": "Use tools to parse PDF format scientific papers and extract text and structural information.",
+                "importance": 3,
+                "key_concepts": ["PDF parsing / PDF解析", "Text extraction / 文本提取", "Structure recognition / 结构识别"],
+                "examples": [{"title": "PDF Processing", "prompt": "from PyPDF2 import PdfReader\n\ndef extract_paper_content(pdf_path):\n    reader = PdfReader(pdf_path)\n    text = ''\n    for page in reader.pages:\n        text += page.extract_text()\n    sections = split_into_sections(text)\n    return {'abstract': sections['abstract'], 'methods': sections['methods'], 'results': sections['results']}", "response": "Extract and structure PDF content"}]
+            },
+            {
+                "title": "引用分析 / Citation Analysis",
+                "description": "分析论文引用关系，识别相关工作和研究背景。",
+                "description_en": "Analyze citation relationships to identify related work and research background.",
+                "importance": 2,
+                "key_concepts": ["Citation extraction / 引用提取", "Reference network / 引用网络", "Related work / 相关工作"],
+                "examples": [{"title": "Citation Analysis", "prompt": "def analyze_citations(paper):\n    references = extract_references(paper)\n    citation_network = build_citation_graph(references)\n    key_papers = identify_seminar_works(citation_network)\n    return {'total_citations': len(references), 'key_references': key_papers}", "response": "Analyze paper citations and references"}]
             }
         ],
         "terms": [
-            {"term": "Scientific Paper Agent", "term_cn": "科学论文Agent", "definition": "分析和总结科学论文的AI Agent", "definition_en": "AI agent for analyzing and summarizing scientific papers"}
+            {"term": "Scientific Paper Agent", "term_cn": "科学论文Agent", "definition": "分析和总结科学论文的AI Agent", "definition_en": "AI agent for analyzing and summarizing scientific papers"},
+            {"term": "PDF Parsing", "term_cn": "PDF解析", "definition": "从PDF文档中提取文本和结构", "definition_en": "Extracting text and structure from PDF documents"},
+            {"term": "Citation Analysis", "term_cn": "引用分析", "definition": "分析论文引用关系和相关工作", "definition_en": "Analyzing paper citation relationships and related work"}
         ],
         "questions": [
-            {"kp_index": 0, "type": "single_choice", "question": "科学论文Agent提取哪些关键信息？", "options": ["A. 只有标题", "B. 方法、结果和结论", "C. 只有作者", "D. 只有参考文献"], "answer": "B", "explanation": "科学论文Agent提取方法、结果和结论等关键信息。", "difficulty": 1}
+            {"kp_index": 0, "type": "single_choice", "question": "科学论文Agent提取哪些关键信息？", "options": ["A. 只有标题", "B. 方法、结果和结论", "C. 只有作者", "D. 只有参考文献"], "answer": "B", "explanation": "科学论文Agent提取方法、结果和结论等关键信息。", "difficulty": 1},
+            {"kp_index": 1, "type": "true_false", "question": "PDF文档处理可以提取论文的结构信息。", "answer": "正确", "explanation": "PDF解析工具可以提取文本并识别论文结构。", "difficulty": 1},
+            {"kp_index": 2, "type": "single_choice", "question": "引用分析的作用是什么？", "options": ["A. 计算字数", "B. 识别相关工作和研究背景", "C. 翻译论文", "D. 生成图片"], "answer": "B", "explanation": "引用分析帮助识别相关工作和研究背景。", "difficulty": 1}
         ]
     },
     "news_tldr_langgraph.ipynb": {
@@ -450,13 +550,33 @@ AGENTS_COURSES_DATA = {
                 "importance": 2,
                 "key_concepts": ["News analysis / 新闻分析", "Key point extraction / 关键点提取", "TLDR generation / 摘要生成"],
                 "examples": [{"title": "News TLDR", "prompt": "key_points = extract_key_points(news_article)\ntldr = generate_tldr(key_points, max_length=100)", "response": "Generate news TLDR summary"}]
+            },
+            {
+                "title": "新闻源监控 / News Source Monitoring",
+                "description": "监控多个新闻源，自动获取和更新新闻内容。",
+                "description_en": "Monitor multiple news sources to automatically fetch and update news content.",
+                "importance": 3,
+                "key_concepts": ["RSS feeds / RSS订阅", "Web scraping / 网页抓取", "Source aggregation / 来源聚合"],
+                "examples": [{"title": "News Monitoring", "prompt": "import feedparser\n\ndef monitor_news_sources(rss_urls):\n    articles = []\n    for url in rss_urls:\n        feed = feedparser.parse(url)\n        for entry in feed.entries[:5]:\n            articles.append({\n                'title': entry.title,\n                'link': entry.link,\n                'published': entry.published,\n                'summary': entry.summary\n            })\n    return articles", "response": "Monitor RSS feeds for news articles"}]
+            },
+            {
+                "title": "个性化推荐 / Personalized Recommendation",
+                "description": "根据用户兴趣和阅读历史推荐相关新闻摘要。",
+                "description_en": "Recommend relevant news summaries based on user interests and reading history.",
+                "importance": 2,
+                "key_concepts": ["User preferences / 用户偏好", "Content filtering / 内容过滤", "Recommendation engine / 推荐引擎"],
+                "examples": [{"title": "Personalization", "prompt": "def recommend_news(user_profile, news_pool):\n    user_interests = user_profile['interests']\n    scored_news = []\n    for news in news_pool:\n        score = calculate_relevance(news['topics'], user_interests)\n        scored_news.append((news, score))\n    return sorted(scored_news, key=lambda x: x[1], reverse=True)[:10]", "response": "Recommend news based on user interests"}]
             }
         ],
         "terms": [
-            {"term": "TLDR", "term_cn": "太长不看", "definition": "简洁的内容摘要", "definition_en": "Concise content summary"}
+            {"term": "TLDR", "term_cn": "太长不看", "definition": "简洁的内容摘要", "definition_en": "Concise content summary"},
+            {"term": "RSS Feed", "term_cn": "RSS订阅", "definition": "用于获取更新内容的订阅源", "definition_en": "Subscription source for fetching updated content"},
+            {"term": "News Aggregation", "term_cn": "新闻聚合", "definition": "从多个来源收集新闻内容", "definition_en": "Collecting news content from multiple sources"}
         ],
         "questions": [
-            {"kp_index": 0, "type": "true_false", "question": "新闻摘要Agent可以生成简洁的新闻摘要。", "answer": "正确", "explanation": "新闻摘要Agent分析新闻内容并生成简洁摘要。", "difficulty": 1}
+            {"kp_index": 0, "type": "true_false", "question": "新闻摘要Agent可以生成简洁的新闻摘要。", "answer": "正确", "explanation": "新闻摘要Agent分析新闻内容并生成简洁摘要。", "difficulty": 1},
+            {"kp_index": 1, "type": "single_choice", "question": "RSS订阅的作用是什么？", "options": ["A. 发送邮件", "B. 监控新闻源获取更新", "C. 存储文件", "D. 播放视频"], "answer": "B", "explanation": "RSS订阅用于监控新闻源并自动获取更新内容。", "difficulty": 1},
+            {"kp_index": 2, "type": "single_choice", "question": "个性化推荐基于什么进行推荐？", "options": ["A. 随机选择", "B. 用户兴趣和阅读历史", "C. 发布时间", "D. 文章长度"], "answer": "B", "explanation": "个性化推荐基于用户兴趣和阅读历史进行推荐。", "difficulty": 1}
         ]
     },
     "simple_travel_planner_langgraph.ipynb": {
@@ -470,13 +590,33 @@ AGENTS_COURSES_DATA = {
                 "importance": 2,
                 "key_concepts": ["Preference analysis / 偏好分析", "Itinerary generation / 行程生成", "Constraint satisfaction / 约束满足"],
                 "examples": [{"title": "Travel Planning", "prompt": "preferences = analyze_preferences(user_input)\nitinerary = generate_itinerary(preferences, destination, dates)", "response": "Generate travel itinerary"}]
+            },
+            {
+                "title": "景点推荐 / Attraction Recommendation",
+                "description": "基于用户兴趣、时间和预算推荐合适的旅游景点。",
+                "description_en": "Recommend suitable tourist attractions based on user interests, time, and budget.",
+                "importance": 3,
+                "key_concepts": ["Interest matching / 兴趣匹配", "Time optimization / 时间优化", "Budget consideration / 预算考虑"],
+                "examples": [{"title": "Attraction Recommendation", "prompt": "def recommend_attractions(destination, preferences, budget, duration):\n    all_attractions = get_attractions(destination)\n    filtered = filter_by_preferences(all_attractions, preferences)\n    scored = score_by_relevance(filtered, preferences)\n    optimized = optimize_route(scored, duration)\n    return optimized[:preferences['max_attractions']]", "response": "Recommend and optimize attractions"}]
+            },
+            {
+                "title": "动态调整 / Dynamic Adjustment",
+                "description": "根据实时信息（天气、交通等）动态调整行程安排。",
+                "description_en": "Dynamically adjust itinerary based on real-time information (weather, traffic, etc.).",
+                "importance": 2,
+                "key_concepts": ["Real-time updates / 实时更新", "Weather integration / 天气集成", "Flexible rescheduling / 灵活重排"],
+                "examples": [{"title": "Dynamic Adjustment", "prompt": "def adjust_itinerary(itinerary, weather_forecast, traffic_info):\n    adjustments = []\n    for day in itinerary.days:\n        if weather_forecast[day.date] == 'rain':\n            outdoor = [a for a in day.activities if a.type == 'outdoor']\n            indoor_alternatives = find_indoor_alternatives(outdoor)\n            adjustments.append(replace_activities(day, outdoor, indoor_alternatives))\n    return apply_adjustments(itinerary, adjustments)", "response": "Adjust itinerary based on weather"}]
             }
         ],
         "terms": [
-            {"term": "Travel Planner Agent", "term_cn": "旅行规划Agent", "definition": "帮助规划旅行行程的AI Agent", "definition_en": "AI agent helping plan travel itineraries"}
+            {"term": "Travel Planner Agent", "term_cn": "旅行规划Agent", "definition": "帮助规划旅行行程的AI Agent", "definition_en": "AI agent helping plan travel itineraries"},
+            {"term": "Itinerary", "term_cn": "行程", "definition": "旅行的时间安排和活动计划", "definition_en": "Travel schedule and activity plan"},
+            {"term": "Dynamic Adjustment", "term_cn": "动态调整", "definition": "根据实时信息修改行程", "definition_en": "Modifying itinerary based on real-time information"}
         ],
         "questions": [
-            {"kp_index": 0, "type": "single_choice", "question": "旅行规划Agent根据什么生成行程？", "options": ["A. 随机选择", "B. 用户偏好和约束", "C. 固定模板", "D. 价格排序"], "answer": "B", "explanation": "旅行规划Agent根据用户偏好和约束条件生成行程。", "difficulty": 1}
+            {"kp_index": 0, "type": "single_choice", "question": "旅行规划Agent根据什么生成行程？", "options": ["A. 随机选择", "B. 用户偏好和约束", "C. 固定模板", "D. 价格排序"], "answer": "B", "explanation": "旅行规划Agent根据用户偏好和约束条件生成行程。", "difficulty": 1},
+            {"kp_index": 1, "type": "true_false", "question": "景点推荐需要考虑用户的兴趣和预算。", "answer": "正确", "explanation": "景点推荐基于用户兴趣、时间和预算进行个性化推荐。", "difficulty": 1},
+            {"kp_index": 2, "type": "single_choice", "question": "动态调整考虑哪些实时信息？", "options": ["A. 只有价格", "B. 天气和交通等", "C. 只有时间", "D. 用户年龄"], "answer": "B", "explanation": "动态调整考虑天气、交通等实时信息。", "difficulty": 1}
         ]
     },
     "generate_podcast_agent_langgraph.ipynb": {
@@ -490,13 +630,33 @@ AGENTS_COURSES_DATA = {
                 "importance": 2,
                 "key_concepts": ["Script generation / 脚本生成", "Dialogue creation / 对话创建", "Structure planning / 结构规划"],
                 "examples": [{"title": "Podcast Script", "prompt": "outline = create_outline(topic, duration)\nscript = generate_script(outline, style='conversational')", "response": "Generate podcast script"}]
+            },
+            {
+                "title": "多角色对话 / Multi-character Dialogue",
+                "description": "创建多个虚拟角色进行对话，模拟真实的播客讨论场景。",
+                "description_en": "Create multiple virtual characters for dialogue, simulating real podcast discussion scenarios.",
+                "importance": 3,
+                "key_concepts": ["Character personas / 角色人设", "Voice differentiation / 声音区分", "Conversation flow / 对话流程"],
+                "examples": [{"title": "Multi-character Setup", "prompt": "class PodcastCharacter:\n    def __init__(self, name, personality, expertise):\n        self.name = name\n        self.personality = personality\n        self.expertise = expertise\n\nhost = PodcastCharacter('Alex', 'energetic', 'technology')\nco_host = PodcastCharacter('Sam', 'analytical', 'business')\nguest = PodcastCharacter('Dr. Lee', 'academic', 'AI research')\n\ndef generate_dialogue(characters, topic):\n    return llm.invoke(f'Create podcast dialogue between {characters} about {topic}')", "response": "Set up multi-character podcast dialogue"}]
+            },
+            {
+                "title": "音频合成集成 / Audio Synthesis Integration",
+                "description": "集成文本转语音服务，将脚本转换为音频内容。",
+                "description_en": "Integrate text-to-speech services to convert scripts into audio content.",
+                "importance": 2,
+                "key_concepts": ["Text-to-speech / 文本转语音", "Voice cloning / 声音克隆", "Audio production / 音频制作"],
+                "examples": [{"title": "Audio Synthesis", "prompt": "from elevenlabs import generate, set_api_key\n\ndef synthesize_podcast(script, voice_mapping):\n    audio_segments = []\n    for line in script.lines:\n        voice_id = voice_mapping[line.character]\n        audio = generate(text=line.content, voice=voice_id)\n        audio_segments.append(audio)\n    return combine_audio(audio_segments)", "response": "Synthesize podcast audio from script"}]
             }
         ],
         "terms": [
-            {"term": "Podcast Agent", "term_cn": "播客Agent", "definition": "生成播客内容的AI Agent", "definition_en": "AI agent generating podcast content"}
+            {"term": "Podcast Agent", "term_cn": "播客Agent", "definition": "生成播客内容的AI Agent", "definition_en": "AI agent generating podcast content"},
+            {"term": "Text-to-Speech", "term_cn": "文本转语音", "definition": "将文本转换为音频的技术", "definition_en": "Technology converting text to audio"},
+            {"term": "Character Persona", "term_cn": "角色人设", "definition": "播客角色的性格和背景设定", "definition_en": "Personality and background settings for podcast characters"}
         ],
         "questions": [
-            {"kp_index": 0, "type": "true_false", "question": "播客生成Agent可以生成对话脚本。", "answer": "正确", "explanation": "播客生成Agent可以生成包含对话的播客脚本。", "difficulty": 1}
+            {"kp_index": 0, "type": "true_false", "question": "播客生成Agent可以生成对话脚本。", "answer": "正确", "explanation": "播客生成Agent可以生成包含对话的播客脚本。", "difficulty": 1},
+            {"kp_index": 1, "type": "single_choice", "question": "多角色对话的作用是什么？", "options": ["A. 减少内容", "B. 模拟真实讨论场景", "C. 增加成本", "D. 无作用"], "answer": "B", "explanation": "多角色对话模拟真实的播客讨论场景。", "difficulty": 1},
+            {"kp_index": 2, "type": "single_choice", "question": "音频合成使用什么技术？", "options": ["A. 视频编辑", "B. 文本转语音", "C. 图片处理", "D. 数据分析"], "answer": "B", "explanation": "音频合成使用文本转语音技术将脚本转换为音频。", "difficulty": 1}
         ]
     },
     "music_compositor_agent_langgraph.ipynb": {
@@ -510,13 +670,33 @@ AGENTS_COURSES_DATA = {
                 "importance": 2,
                 "key_concepts": ["Style analysis / 风格分析", "Composition structure / 作曲结构", "Creative suggestions / 创意建议"],
                 "examples": [{"title": "Music Composition", "prompt": "style_params = analyze_style(genre, mood)\ncomposition = generate_composition(style_params, duration)", "response": "Generate music composition suggestions"}]
+            },
+            {
+                "title": "音乐理论应用 / Music Theory Application",
+                "description": "应用音乐理论知识，包括和弦进程、调性和节奏模式。",
+                "description_en": "Apply music theory knowledge including chord progressions, tonality, and rhythm patterns.",
+                "importance": 3,
+                "key_concepts": ["Chord progressions / 和弦进程", "Key signatures / 调号", "Rhythm patterns / 节奏模式"],
+                "examples": [{"title": "Music Theory", "prompt": "def generate_chord_progression(key, style, num_bars):\n    theory_rules = load_music_theory(style)\n    chords = []\n    current_chord = theory_rules['tonic'][key]\n    for i in range(num_bars):\n        next_chord = select_next_chord(current_chord, theory_rules['progressions'])\n        chords.append(next_chord)\n        current_chord = next_chord\n    return chords", "response": "Generate chord progression based on music theory"}]
+            },
+            {
+                "title": "MIDI生成与输出 / MIDI Generation & Output",
+                "description": "将创作的音乐转换为MIDI格式，支持导出和播放。",
+                "description_en": "Convert composed music to MIDI format, supporting export and playback.",
+                "importance": 2,
+                "key_concepts": ["MIDI format / MIDI格式", "Note representation / 音符表示", "Export options / 导出选项"],
+                "examples": [{"title": "MIDI Output", "prompt": "from midiutil import MIDIFile\n\ndef create_midi(composition, output_path):\n    midi = MIDIFile(1)\n    track = 0\n    time = 0\n    midi.addTrackName(track, time, composition.title)\n    midi.addTempo(track, time, composition.tempo)\n    \n    for note in composition.notes:\n        midi.addNote(track, 0, note.pitch, note.start, note.duration, note.velocity)\n    \n    with open(output_path, 'wb') as f:\n        midi.writeFile(f)", "response": "Create MIDI file from composition"}]
             }
         ],
         "terms": [
-            {"term": "Music Compositor Agent", "term_cn": "音乐作曲Agent", "definition": "协助音乐创作的AI Agent", "definition_en": "AI agent assisting in music composition"}
+            {"term": "Music Compositor Agent", "term_cn": "音乐作曲Agent", "definition": "协助音乐创作的AI Agent", "definition_en": "AI agent assisting in music composition"},
+            {"term": "Chord Progression", "term_cn": "和弦进程", "definition": "和弦的序列排列", "definition_en": "Sequential arrangement of chords"},
+            {"term": "MIDI", "term_cn": "MIDI格式", "definition": "音乐数字接口标准格式", "definition_en": "Musical Instrument Digital Interface format"}
         ],
         "questions": [
-            {"kp_index": 0, "type": "single_choice", "question": "音乐作曲Agent根据什么生成创作建议？", "options": ["A. 随机生成", "B. 风格和参数", "C. 固定模板", "D. 用户年龄"], "answer": "B", "explanation": "音乐作曲Agent根据风格和参数生成创作建议。", "difficulty": 1}
+            {"kp_index": 0, "type": "single_choice", "question": "音乐作曲Agent根据什么生成创作建议？", "options": ["A. 随机生成", "B. 风格和参数", "C. 固定模板", "D. 用户年龄"], "answer": "B", "explanation": "音乐作曲Agent根据风格和参数生成创作建议。", "difficulty": 1},
+            {"kp_index": 1, "type": "true_false", "question": "音乐理论应用包括和弦进程和调性。", "answer": "正确", "explanation": "音乐理论应用包括和弦进程、调性和节奏模式等。", "difficulty": 1},
+            {"kp_index": 2, "type": "single_choice", "question": "MIDI格式用于什么？", "options": ["A. 图片存储", "B. 音乐数据表示和交换", "C. 视频编辑", "D. 文档处理"], "answer": "B", "explanation": "MIDI格式用于音乐数据的表示和交换。", "difficulty": 1}
         ]
     },
     "search_the_internet_and_summarize.ipynb": {
@@ -530,13 +710,33 @@ AGENTS_COURSES_DATA = {
                 "importance": 3,
                 "key_concepts": ["Search tool integration / 搜索工具集成", "Result aggregation / 结果聚合", "Summary synthesis / 摘要综合"],
                 "examples": [{"title": "Search & Summarize", "prompt": "search_results = search_tool(query)\naggregated = aggregate_results(search_results)\nsummary = synthesize_summary(aggregated)", "response": "Search internet and summarize findings"}]
+            },
+            {
+                "title": "搜索API集成 / Search API Integration",
+                "description": "集成多种搜索API（如Google、Bing、DuckDuckGo）获取搜索结果。",
+                "description_en": "Integrate multiple search APIs (Google, Bing, DuckDuckGo) to fetch search results.",
+                "importance": 3,
+                "key_concepts": ["API integration / API集成", "Rate limiting / 速率限制", "Result pagination / 结果分页"],
+                "examples": [{"title": "Search API", "prompt": "from duckduckgo_search import DDGS\n\ndef search_internet(query, max_results=10):\n    results = []\n    with DDGS() as ddgs:\n        for r in ddgs.text(query, max_results=max_results):\n            results.append({\n                'title': r['title'],\n                'link': r['href'],\n                'snippet': r['body']\n            })\n    return results", "response": "Search internet using DuckDuckGo API"}]
+            },
+            {
+                "title": "内容提取与处理 / Content Extraction & Processing",
+                "description": "从搜索结果页面提取主要内容，进行清洗和处理。",
+                "description_en": "Extract main content from search result pages and perform cleaning and processing.",
+                "importance": 2,
+                "key_concepts": ["Web scraping / 网页抓取", "Content cleaning / 内容清洗", "Text extraction / 文本提取"],
+                "examples": [{"title": "Content Extraction", "prompt": "from bs4 import BeautifulSoup\nimport requests\n\ndef extract_content(url):\n    response = requests.get(url, timeout=10)\n    soup = BeautifulSoup(response.content, 'html.parser')\n    \n    # Remove scripts and styles\n    for script in soup(['script', 'style']):\n        script.decompose()\n    \n    text = soup.get_text()\n    lines = (line.strip() for line in text.splitlines() if line.strip())\n    return '\\n'.join(lines)", "response": "Extract and clean web content"}]
             }
         ],
         "terms": [
-            {"term": "Search Agent", "term_cn": "搜索Agent", "definition": "执行网络搜索的AI Agent", "definition_en": "AI agent executing internet searches"}
+            {"term": "Search Agent", "term_cn": "搜索Agent", "definition": "执行网络搜索的AI Agent", "definition_en": "AI agent executing internet searches"},
+            {"term": "Search API", "term_cn": "搜索API", "definition": "提供搜索服务的编程接口", "definition_en": "Programming interface providing search services"},
+            {"term": "Web Scraping", "term_cn": "网页抓取", "definition": "从网页提取数据的技术", "definition_en": "Technology for extracting data from web pages"}
         ],
         "questions": [
-            {"kp_index": 0, "type": "true_false", "question": "网络搜索摘要Agent可以聚合多个搜索结果。", "answer": "正确", "explanation": "Agent可以聚合多个搜索结果并生成综合摘要。", "difficulty": 1}
+            {"kp_index": 0, "type": "true_false", "question": "网络搜索摘要Agent可以聚合多个搜索结果。", "answer": "正确", "explanation": "Agent可以聚合多个搜索结果并生成综合摘要。", "difficulty": 1},
+            {"kp_index": 1, "type": "single_choice", "question": "搜索API集成需要考虑什么？", "options": ["A. 只有价格", "B. 速率限制", "C. 只有界面", "D. 无需考虑"], "answer": "B", "explanation": "搜索API集成需要考虑速率限制、分页等因素。", "difficulty": 1},
+            {"kp_index": 2, "type": "single_choice", "question": "内容提取的目的是什么？", "options": ["A. 删除内容", "B. 获取主要内容并清洗", "C. 加密内容", "D. 翻译内容"], "answer": "B", "explanation": "内容提取用于获取主要内容并进行清洗处理。", "difficulty": 1}
         ]
     }
 }

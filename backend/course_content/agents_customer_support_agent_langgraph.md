@@ -30,6 +30,56 @@ else:
 
 ---
 
+### 2. 多轮对话管理 / Multi-turn Conversation Management
+
+**English:** Use LangGraph state management to implement multi-turn conversations and maintain context consistency.
+
+**中文:** 使用LangGraph状态管理实现多轮对话，保持上下文一致性。
+
+**Key Concepts / 核心概念:**
+- State persistence / 状态持久化
+- Context tracking / 上下文跟踪
+- Conversation flow / 对话流程
+
+**Example / 示例:**
+```python
+class SupportState(TypedDict):
+    messages: List[Message]
+    customer_id: str
+    issue_type: str
+    resolution_attempts: int
+
+workflow.add_node('classify', classify_node)
+workflow.add_node('respond', respond_node)
+workflow.add_node('escalate', escalate_node)
+# → Define support workflow state and nodes
+
+```
+
+---
+
+### 3. 知识库集成 / Knowledge Base Integration
+
+**English:** Integrate knowledge base and FAQ systems to provide accurate automated responses.
+
+**中文:** 集成知识库和FAQ系统，提供准确的自动回复。
+
+**Key Concepts / 核心概念:**
+- RAG retrieval / RAG检索
+- FAQ matching / FAQ匹配
+- Document search / 文档搜索
+
+**Example / 示例:**
+```python
+relevant_docs = knowledge_base.search(customer_query, top_k=3)
+context = '\n'.join([doc.content for doc in relevant_docs])
+response = llm.invoke(f'Context: {context}\nQuestion: {customer_query}')
+# → Retrieve and use knowledge base for response
+
+```
+
+---
+
 ## Summary / 总结
 
 This lesson covered key AI Agent concepts. Practice these techniques to build better intelligent systems.

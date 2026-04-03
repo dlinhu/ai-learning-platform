@@ -28,6 +28,61 @@ user_proxy.initiate_chat(assistant, message='Research topic...')
 
 ---
 
+### 2. Agent角色定义 / Agent Role Definition
+
+**English:** Define agents with different roles such as researcher, critic, and writer for specialized division of labor.
+
+**中文:** 定义不同角色的Agent，如研究员、评论家、撰稿人等，实现专业化分工。
+
+**Key Concepts / 核心概念:**
+- Role specialization / 角色专业化
+- System messages / 系统消息
+- Agent persona / Agent人设
+
+**Example / 示例:**
+```python
+researcher = AssistantAgent(
+    'researcher',
+    system_message='You are a research specialist. Find and analyze information.',
+    llm_config=llm_config
+)
+critic = AssistantAgent(
+    'critic',
+    system_message='You are a critical reviewer. Provide constructive feedback.',
+    llm_config=llm_config
+)
+# → Define specialized agent roles
+
+```
+
+---
+
+### 3. 群组对话管理 / Group Chat Management
+
+**English:** Use GroupChat to manage conversation flow and turns between multiple agents.
+
+**中文:** 使用GroupChat管理多个Agent之间的对话流程和轮次。
+
+**Key Concepts / 核心概念:**
+- GroupChat / 群组对话
+- Speaker selection / 发言者选择
+- Round-robin / 轮流发言
+
+**Example / 示例:**
+```python
+groupchat = GroupChat(
+    agents=[researcher, writer, critic],
+    messages=[],
+    max_round=10
+)
+manager = GroupChatManager(groupchat=groupchat)
+user_proxy.initiate_chat(manager, message='Research topic...')
+# → Set up group chat for multi-agent collaboration
+
+```
+
+---
+
 ## Summary / 总结
 
 This lesson covered key AI Agent concepts. Practice these techniques to build better intelligent systems.
