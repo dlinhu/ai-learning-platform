@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
+import NewsList from '../components/NewsList'
 
 export default function Home() {
   const { user } = useAuthStore()
@@ -83,6 +84,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+      
+      <NewsList />
     </div>
   )
 }

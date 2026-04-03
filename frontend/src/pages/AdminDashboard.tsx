@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { adminApi, AdminStats, UserListItem, UserDetailResponse, UsersListParams } from '../services/admin'
+import GroupProgressModal from './GroupProgressModal'
 
 function formatTime(minutes: number): string {
   if (minutes < 60) {
@@ -45,6 +46,8 @@ export default function AdminDashboard() {
   const [order, setOrder] = useState<UsersListParams['order']>('desc')
   const [selectedUser, setSelectedUser] = useState<UserDetailResponse | null>(null)
   const [modalLoading, setModalLoading] = useState(false)
+  const [showGroupProgress, setShowGroupProgress] = useState(false)
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null)
   
   useEffect(() => {
     loadStats()
@@ -111,12 +114,20 @@ export default function AdminDashboard() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           管理员仪表盘
         </h1>
-        <button
-          onClick={() => { loadStats(); loadUsers(); }}
-          className="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-        >
-          刷新数据
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { loadStats(); loadUsers(); }}
+            className="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          >
+            刷新数据
+          </button>
+          <button
+            onClick={() => setShowGroupProgress(true)}
+            className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            查看分组进度
+          </button>
+        </div>
       </div>
       
       {stats && (
@@ -262,26 +273,50 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <select
-                          value={user.group || 'group1'}
-                          onChange={(e) => {
-                            const newGroup = e.target.value
-                            adminApi.updateUserGroup(user.user_id, newGroup)
-                            setUsers(users.map(u =>
-                              u.user_id === user.user_id
-                                ? { ...u, group: newGroup }
-                                : u
-                            ))
-                          }}
-                          className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                        >
-                          <option value="group1">Group 1</option>
-                          <option value="group2">Group 2</option>
-                          <option value="group3">Group 3</option>
-                          <option value="group4">Group 4</option>
-                          <option value="group5">Group 5</option>
-                          <option value="group6">Group 6</option>
-                        </select>
+                        <div className="flex gap-2">
+                          <select
+                            value={user.group || 'group1'}
+                            onChange={(e) => {
+                              const newGroup = e.target.value
+                              adminApi.updateUserGroup(user.user_id, newGroup)
+                              setUsers(users.map(u =>
+                                u.user_id === user.user_id
+                                  ? { ...u, group: newGroup }
+                                  : u
+                              ))
+                            }}
+                            className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                          >
+                            <option value="group1">Group 1</option>
+                            <option value="group2">Group 2</option>
+                            <option value="group3">Group 3</option>
+                            <option value="group4">Group 4</option>
+                            <option value="group5">Group 5</option>
+                            <option value="group6">Group 6</option>
+                          </select>
+                          <select
+                            value={user.role || 'student'}
+                            onChange={(e) => {
+                              const newRole = e.target.value
+                              if (confirm(`确定要将用户 ${user.username} 的角色修改为 ${newRole === 'admin' ? '管理员' : '学生'} 吗？`)) {
+                                adminApi.updateUserRole(user.user_id, newRole)
+                                setUsers(users.map(u =>
+                                  u.user_id === user.user_id
+                                    ? { ...u, role: newRole }
+                                    : u
+                                ))
+                              }
+                            }}
+                            className={`px-2 py-1 text-xs rounded border ${
+                              user.role === 'admin' 
+                                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300' 
+                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+                            } focus:ring-2 focus:ring-primary-500`}
+                          >
+                            <option value="student">学生</option>
+                            <option value="admin">管理员</option>
+                          </select>
+                        </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                         {formatTime(user.total_time_spent)}
@@ -505,6 +540,10 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
+      )}
+
+      {showGroupProgress && (
+        <GroupProgressModal onClose={() => setShowGroupProgress(false)} />
       )}
     </div>
   )

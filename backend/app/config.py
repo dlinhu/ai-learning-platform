@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "AI Learning Platform"
     DEBUG: bool = True
     
-    DATABASE_URL: str = "sqlite:///./data/learning.db"
+    DATABASE_URL: str = f"sqlite:///{os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'learning.db')}"
     
     SECRET_KEY: str = "your-secret-key-change-in-production"
     ALGORITHM: str = "HS256"

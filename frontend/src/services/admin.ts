@@ -77,6 +77,36 @@ export interface UsersListParams {
   search?: string
 }
 
+export interface GroupMemberProgress {
+  user_id: string
+  username: string
+  email: string
+  role: string
+  group: string
+  total_time_spent: number
+  completed_lessons: number
+  in_progress_lessons: number
+  completion_rate: number
+  last_active: string | null
+  current_streak: number
+}
+
+export interface GroupProgressResponse {
+  group_name: string
+  total_members: number
+  members: GroupMemberProgress[]
+}
+
+export interface GroupSummary {
+  group_name: string
+  member_count: number
+  total_time_spent: number
+  total_completed: number
+  total_in_progress: number
+  admins: number
+}
+
+
 export const adminApi = {
   getStats: async (): Promise<AdminStats> => {
     const response = await api.get<AdminStats>('/admin/stats')
@@ -99,6 +129,24 @@ export const adminApi = {
     })
     return response.data
   },
+
+  updateUserRole: async (userId: string, role: string): Promise<{ message: string; role: string; username: string }> => {
+    const response = await api.put<{ message: string; role: string; username: string }>(`/admin/users/${userId}/role`, null, {
+      params: { role }
+    })
+    return response.data
+  },
+
+  getGroupProgress: async (groupName: string): Promise<GroupProgressResponse> => {
+    const response = await api.get<GroupProgressResponse>(`/admin/groups/${groupName}/progress`)
+    return response.data
+  },
+
+  getGroupsSummary: async (): Promise<{ groups: GroupSummary[] }> => {
+    const response = await api.get<{ groups: GroupSummary[] }>('/admin/groups/summary')
+    return response.data
+  },
+
 
   getModules: async (): Promise<{ id: string; name: string; description: string; order_index: number; lesson_count: number }[]> => {
     const response = await api.get('/admin/modules')

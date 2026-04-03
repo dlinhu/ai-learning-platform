@@ -184,3 +184,20 @@ class AISettings(Base):
     local_model_name = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class AINews(Base):
+    __tablename__ = "ai_news"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    title = Column(String, nullable=False)
+    summary = Column(Text)
+    content = Column(Text)
+    source = Column(String)
+    source_url = Column(String)
+    category = Column(String, default="general")
+    image_url = Column(String, nullable=True)
+    published_at = Column(DateTime)
+    fetched_at = Column(DateTime, default=datetime.utcnow)
+    is_featured = Column(Boolean, default=False)
+    view_count = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)

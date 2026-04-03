@@ -267,6 +267,137 @@ def update_user_group(
     db.commit()
     return {"message": "Group updated", "group": group}
 
+@router.put("/users/{user_id}/role")
+def update_user_role(
+    user_id: str,
+    role: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    from fastapi import HTTPException
+    
+    valid_roles = ["student", "admin"]
+    if role not in valid_roles:
+        raise HTTPException(status_code=400, detail="Invalid role. Must be 'student' or 'admin'")
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot change your own role")
+    
+    user.role = role
+    db.commit()
+    return {"message": "Role updated", "role": role, "username": user.username}
+
+class GroupMemberProgress(BaseModel):
+    user_id: str
+    username: str
+    email: str
+    role: str
+    group: str
+    total_time_spent: int
+    completed_lessons: int
+    in_progress_lessons: int
+    completion_rate: float
+    last_active: Optional[datetime]
+    current_streak: int
+
+class GroupProgressResponse(BaseModel):
+    group_name: str
+    total_members: int
+    members: List[GroupMemberProgress]
+
+@router.get("/groups/{group_name}/progress", response_model=GroupProgressResponse)
+def get_group_progress(
+    group_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    from fastapi import HTTPException
+    
+    valid_groups = ["group1", "group2", "group3", "group4", "group5", "group6"]
+    if group_name not in valid_groups:
+        raise HTTPException(status_code=400, detail="Invalid group name")
+    
+    users = db.query(User).filter(User.group == group_name).all()
+    total_lessons = db.query(Lesson).count()
+    
+    members_progress = []
+    for user in users:
+        progress_records = db.query(Progress).filter(
+            Progress.user_id == user.id
+        ).all()
+        
+        total_time = sum(p.time_spent or 0 for p in progress_records)
+        completed = len([p for p in progress_records if p.status == "completed"])
+        in_progress = len([p for p in progress_records if p.status == "in_progress"])
+        completion_rate = (completed / total_lessons * 100) if total_lessons > 0 else 0
+        
+        last_active = None
+        dates = [p.started_at for p in progress_records if p.started_at]
+        if dates:
+            last_active = max(dates)
+        
+        streak = calculate_streak(progress_records)
+        
+        members_progress.append(GroupMemberProgress(
+            user_id=user.id,
+            username=user.username,
+            email=user.email,
+            role=user.role,
+            group=user.group,
+            total_time_spent=total_time,
+            completed_lessons=completed,
+            in_progress_lessons=in_progress,
+            completion_rate=round(completion_rate, 1),
+            last_active=last_active,
+            current_streak=streak
+        ))
+    
+    members_progress.sort(key=lambda x: x.completion_rate, reverse=True)
+    
+    return GroupProgressResponse(
+        group_name=group_name,
+        total_members=len(users),
+        members=members_progress
+    )
+
+@router.get("/groups/summary")
+def get_groups_summary(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    groups_summary = []
+    valid_groups = ["group1", "group2", "group3", "group4", "group5", "group6"]
+    
+    for group_name in valid_groups:
+        users = db.query(User).filter(User.group == group_name).all()
+        
+        total_time = 0
+        total_completed = 0
+        total_in_progress = 0
+        
+        for user in users:
+            progress_records = db.query(Progress).filter(
+                Progress.user_id == user.id
+            ).all()
+            total_time += sum(p.time_spent or 0 for p in progress_records)
+            total_completed += len([p for p in progress_records if p.status == "completed"])
+            total_in_progress += len([p for p in progress_records if p.status == "in_progress"])
+        
+        groups_summary.append({
+            "group_name": group_name,
+            "member_count": len(users),
+            "total_time_spent": total_time,
+            "total_completed": total_completed,
+            "total_in_progress": total_in_progress,
+            "admins": len([u for u in users if u.role == "admin"])
+        })
+    
+    return {"groups": groups_summary}
+
 @router.get("/users/{user_id}/detail", response_model=UserDetailResponse)
 def get_user_detail(
     user_id: str,
