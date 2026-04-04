@@ -8,8 +8,8 @@ import math
 import os
 
 from app.utils.database import get_db
-from app.models.models import Progress, Lesson, Module, User, KnowledgePoint, AISettings, PracticeQuestion
-from app.routers.auth import get_current_user
+from app.models.models import Progress, Lesson, Module, User, KnowledgePoint, AISettings, PracticeQuestion, UserRole
+from app.routers.auth import get_current_user, require_group_admin
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -76,7 +76,7 @@ class UserDetailResponse(BaseModel):
     calendar_data: List[CalendarDay]
 
 def require_admin(current_user: User = Depends(get_current_user)):
-    if current_user.role != "admin":
+    if current_user.role not in [UserRole.ADMIN.value, UserRole.GROUP_ADMIN.value]:
         from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
@@ -111,27 +111,39 @@ def get_admin_stats(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    total_users = db.query(User).count()
+    user_query = db.query(User)
+    
+    if current_user.role == UserRole.GROUP_ADMIN.value:
+        user_query = user_query.filter(User.group == current_user.group)
+    
+    total_users = user_query.count()
     
     today = datetime.utcnow().date()
     today_start = datetime.combine(today, datetime.min.time())
     
-    active_today = db.query(Progress).filter(
+    progress_query = db.query(Progress)
+    if current_user.role == UserRole.GROUP_ADMIN.value:
+        group_user_ids = [u.id for u in user_query.all()]
+        progress_query = progress_query.filter(Progress.user_id.in_(group_user_ids))
+    
+    active_today = progress_query.filter(
         Progress.started_at >= today_start
     ).distinct(Progress.user_id).count()
     
     week_start = today - timedelta(days=today.weekday())
     week_start_dt = datetime.combine(week_start, datetime.min.time())
     
-    active_week = db.query(Progress).filter(
+    active_week = progress_query.filter(
         Progress.started_at >= week_start_dt
     ).distinct(Progress.user_id).count()
     
-    total_time = db.query(func.sum(Progress.time_spent)).scalar() or 0
+    total_time = db.query(func.sum(Progress.time_spent)).filter(
+        Progress.user_id.in_([u.id for u in user_query.all()]) if current_user.role == UserRole.GROUP_ADMIN.value else True
+    ).scalar() or 0
     
     avg_time = (total_time / total_users) if total_users > 0 else 0
     
-    total_completions = db.query(Progress).filter(
+    total_completions = progress_query.filter(
         Progress.status == "completed"
     ).count()
     
@@ -160,6 +172,9 @@ def get_users_list(
     current_user: User = Depends(require_admin)
 ):
     query = db.query(User)
+    
+    if current_user.role == UserRole.GROUP_ADMIN.value:
+        query = query.filter(User.group == current_user.group)
     
     if search:
         search_pattern = f"%{search}%"
@@ -263,6 +278,11 @@ def update_user_group(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
+    if current_user.role == UserRole.GROUP_ADMIN.value:
+        if user.group != current_user.group:
+            raise HTTPException(status_code=403, detail="You can only modify users in your own group")
+        raise HTTPException(status_code=403, detail="Group admin cannot change user groups")
+    
     user.group = group
     db.commit()
     return {"message": "Group updated", "group": group}
@@ -276,13 +296,19 @@ def update_user_role(
 ):
     from fastapi import HTTPException
     
-    valid_roles = ["student", "admin"]
+    valid_roles = ["student", "group_admin", "admin"]
     if role not in valid_roles:
-        raise HTTPException(status_code=400, detail="Invalid role. Must be 'student' or 'admin'")
+        raise HTTPException(status_code=400, detail="Invalid role. Must be 'student', 'group_admin' or 'admin'")
     
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    if current_user.role == UserRole.GROUP_ADMIN.value:
+        if user.group != current_user.group:
+            raise HTTPException(status_code=403, detail="You can only modify users in your own group")
+        if role == UserRole.ADMIN.value:
+            raise HTTPException(status_code=403, detail="Group admin cannot promote users to admin")
     
     if user.id == current_user.id:
         raise HTTPException(status_code=400, detail="Cannot change your own role")
@@ -320,6 +346,9 @@ def get_group_progress(
     valid_groups = ["group1", "group2", "group3", "group4", "group5", "group6"]
     if group_name not in valid_groups:
         raise HTTPException(status_code=400, detail="Invalid group name")
+    
+    if current_user.role == UserRole.GROUP_ADMIN.value and current_user.group != group_name:
+        raise HTTPException(status_code=403, detail="You can only access your own group's data")
     
     users = db.query(User).filter(User.group == group_name).all()
     total_lessons = db.query(Lesson).count()
@@ -372,6 +401,9 @@ def get_groups_summary(
     groups_summary = []
     valid_groups = ["group1", "group2", "group3", "group4", "group5", "group6"]
     
+    if current_user.role == UserRole.GROUP_ADMIN.value:
+        valid_groups = [current_user.group]
+    
     for group_name in valid_groups:
         users = db.query(User).filter(User.group == group_name).all()
         
@@ -408,6 +440,10 @@ def get_user_detail(
     if not user:
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="User not found")
+    
+    if current_user.role == UserRole.GROUP_ADMIN.value and user.group != current_user.group:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="You can only access users in your own group")
     
     progress_records = db.query(Progress).filter(
         Progress.user_id == user_id

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useAuthStore } from '../stores/authStore'
 import { adminApi, GroupMemberProgress, GroupSummary } from '../services/admin'
 
 interface GroupProgressViewProps {
@@ -6,11 +7,13 @@ interface GroupProgressViewProps {
 }
 
 function GroupProgressView({ onClose }: GroupProgressViewProps) {
-  const [selectedGroup, setSelectedGroup] = useState('group1')
+  const { user: currentUser } = useAuthStore()
+  const [selectedGroup, setSelectedGroup] = useState(currentUser?.group || 'group1')
   const [groupProgress, setGroupProgress] = useState<GroupMemberProgress[]>([])
   const [loading, setLoading] = useState(true)
 
-  const groups = ['group1', 'group2', 'group3', 'group4', 'group5', 'group6']
+  const allGroups = ['group1', 'group2', 'group3', 'group4', 'group5', 'group6']
+  const groups = currentUser?.role === 'admin' ? allGroups : [currentUser?.group || 'group1']
 
   useEffect(() => {
     loadGroupProgress()
@@ -135,6 +138,11 @@ function GroupProgressView({ onClose }: GroupProgressViewProps) {
                                 Admin
                               </span>
                             )}
+                            {member.role === 'group_admin' && (
+                              <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                组长
+                              </span>
+                            )}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
                             {member.email}
@@ -145,9 +153,11 @@ function GroupProgressView({ onClose }: GroupProgressViewProps) {
                         <span className={`px-2 py-1 text-xs rounded-full ${
                           member.role === 'admin'
                             ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
+                            : member.role === 'group_admin'
+                            ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
                             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                         }`}>
-                          {member.role === 'admin' ? '管理员' : '学生'}
+                          {member.role === 'admin' ? '管理员' : member.role === 'group_admin' ? '组长' : '学生'}
                         </span>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">

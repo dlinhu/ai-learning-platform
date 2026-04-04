@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useAuthStore } from '../stores/authStore'
 import { adminApi, AdminStats, UserListItem, UserDetailResponse, UsersListParams } from '../services/admin'
 import GroupProgressModal from './GroupProgressModal'
 
@@ -35,6 +36,7 @@ function getProgressColor(percentage: number): string {
 }
 
 export default function AdminDashboard() {
+  const { user: currentUser } = useAuthStore()
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [users, setUsers] = useState<UserListItem[]>([])
   const [totalUsers, setTotalUsers] = useState(0)
@@ -112,7 +114,7 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          管理员仪表盘
+          {currentUser?.role === 'group_admin' ? '组长仪表盘' : '管理员仪表盘'}
         </h1>
         <div className="flex items-center gap-2">
           <button
@@ -274,6 +276,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="flex gap-2">
+                          {currentUser?.role === 'admin' && (
                           <select
                             value={user.group || 'group1'}
                             onChange={(e) => {
@@ -294,11 +297,17 @@ export default function AdminDashboard() {
                             <option value="group5">Group 5</option>
                             <option value="group6">Group 6</option>
                           </select>
+                          )}
                           <select
                             value={user.role || 'student'}
                             onChange={(e) => {
                               const newRole = e.target.value
-                              if (confirm(`确定要将用户 ${user.username} 的角色修改为 ${newRole === 'admin' ? '管理员' : '学生'} 吗？`)) {
+                              const roleNames: Record<string, string> = {
+                                'student': '学生',
+                                'group_admin': '组长',
+                                'admin': '管理员'
+                              }
+                              if (confirm(`确定要将用户 ${user.username} 的角色修改为 ${roleNames[newRole] || newRole} 吗？`)) {
                                 adminApi.updateUserRole(user.user_id, newRole)
                                 setUsers(users.map(u =>
                                   u.user_id === user.user_id
@@ -310,11 +319,18 @@ export default function AdminDashboard() {
                             className={`px-2 py-1 text-xs rounded border ${
                               user.role === 'admin' 
                                 ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300' 
+                                : user.role === 'group_admin'
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
                                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                             } focus:ring-2 focus:ring-primary-500`}
                           >
                             <option value="student">学生</option>
-                            <option value="admin">管理员</option>
+                            {currentUser?.role === 'admin' && (
+                              <option value="group_admin">组长</option>
+                            )}
+                            {currentUser?.role === 'admin' && (
+                              <option value="admin">管理员</option>
+                            )}
                           </select>
                         </div>
                       </td>

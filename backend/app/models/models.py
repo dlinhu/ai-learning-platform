@@ -7,6 +7,7 @@ from app.utils.database import Base
 
 class UserRole(str, enum.Enum):
     STUDENT = "student"
+    GROUP_ADMIN = "group_admin"
     ADMIN = "admin"
 
 class UserGroup(str, enum.Enum):
@@ -185,19 +186,22 @@ class AISettings(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-class AINews(Base):
-    __tablename__ = "ai_news"
+class Article(Base):
+    __tablename__ = "articles"
     
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     title = Column(String, nullable=False)
-    summary = Column(Text)
-    content = Column(Text)
-    source = Column(String)
-    source_url = Column(String)
+    content = Column(Text, nullable=False)
+    source = Column(String, nullable=False)
+    source_url = Column(String, nullable=False)
     category = Column(String, default="general")
-    image_url = Column(String, nullable=True)
-    published_at = Column(DateTime)
-    fetched_at = Column(DateTime, default=datetime.utcnow)
-    is_featured = Column(Boolean, default=False)
+    summary = Column(Text)
+    author = Column(String, nullable=True)
+    published_at = Column(DateTime, nullable=True)
+    added_by = Column(String, ForeignKey("users.id"))
+    is_published = Column(Boolean, default=True)
     view_count = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    user = relationship("User", backref="articles")

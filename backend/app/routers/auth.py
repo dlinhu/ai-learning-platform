@@ -81,6 +81,36 @@ async def require_admin(current_user: User = Depends(get_current_user)):
         )
     return current_user
 
+async def require_group_admin(current_user: User = Depends(get_current_user)):
+    """验证用户是否为组长或管理员"""
+    if current_user.role not in [UserRole.GROUP_ADMIN.value, UserRole.ADMIN.value]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Group admin access required"
+        )
+    return current_user
+
+async def require_same_group_or_admin(
+    group_name: str,
+    current_user: User = Depends(get_current_user)
+):
+    """验证用户是否有权限访问该组的数据"""
+    if current_user.role == UserRole.ADMIN.value:
+        return current_user  # 管理员可以访问所有组
+    
+    if current_user.role == UserRole.GROUP_ADMIN.value:
+        if current_user.group != group_name:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You can only access your own group's data"
+            )
+        return current_user
+    
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Access denied"
+    )
+
 @router.post("/register", response_model=UserResponse)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == user_data.email).first():

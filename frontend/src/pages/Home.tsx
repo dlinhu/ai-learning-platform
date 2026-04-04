@@ -1,9 +1,26 @@
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
-import NewsList from '../components/NewsList'
+import { useState, useEffect } from 'react'
+import ArticleList from '../components/ArticleList'
+import api from '../services/api'
+
+interface Article {
+  id: string
+  title: string
+  summary: string | null
+  source: string
+  category: string
+  image_url: string | null
+  published_at: string | null
+  view_count: number
+}
 
 export default function Home() {
   const { user } = useAuthStore()
+  const [articles, setArticles] = useState<Article[]>([])
+  const [articleLoading, setArticleLoading] = useState(true)
+  const [articleCategories, setArticleCategories] = useState<string[]>([])
+  const [selectedCategory, setSelectedCategory] = useState('')
   
   const features = [
     { icon: '📚', title: '51天课程', desc: '从Prompts到PROD，系统化学习AI技术' },
@@ -11,6 +28,39 @@ export default function Home() {
     { icon: '💡', title: '知识扩展', desc: '自动提取术语，AI生成名词解释' },
     { icon: '🎯', title: '学习仪表盘', desc: '统计学习数据，追踪连续学习天数' },
   ]
+
+  // 获取文章列表
+  const fetchArticles = async () => {
+    setArticleLoading(true)
+    try {
+      const params = new URLSearchParams()
+      params.append('page', '1')
+      params.append('per_page', '6') // 首页只展示6篇
+      if (selectedCategory) params.append('category', selectedCategory)
+      
+      const response = await api.get(`/articles?${params.toString()}`)
+      setArticles(response.data)
+    } catch (err) {
+      console.error('Error fetching articles:', err)
+    } finally {
+      setArticleLoading(false)
+    }
+  }
+
+  // 获取分类列表
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/articles/categories/list')
+      setArticleCategories(response.data)
+    } catch (err) {
+      console.error('Error fetching categories:', err)
+    }
+  }
+
+  useEffect(() => {
+    fetchArticles()
+    fetchCategories()
+  }, [selectedCategory])
   
   return (
     <div className="space-y-12">
@@ -84,8 +134,23 @@ export default function Home() {
           ))}
         </div>
       </section>
-      
-      <NewsList />
+
+      {/* 推荐文章区域 */}
+      <section className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            推荐文章
+          </h2>
+        </div>
+        <ArticleList
+          articles={articles}
+          loading={articleLoading}
+          onCategoryChange={setSelectedCategory}
+          categories={articleCategories}
+          selectedCategory={selectedCategory}
+          showViewAll={true}
+        />
+      </section>
     </div>
   )
 }

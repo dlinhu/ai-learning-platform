@@ -10,6 +10,10 @@ import LessonDetail from './pages/LessonDetail'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminCourses from './pages/AdminCourses'
 import AdminAISettings from './pages/AdminAISettings'
+import AdminArticles from './pages/AdminArticles'
+import ArticleForm from './pages/ArticleForm'
+import Articles from './pages/Articles'
+import ArticleDetail from './pages/ArticleDetail'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
@@ -17,6 +21,13 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuthStore()
+  if (!user) return <Navigate to="/login" />
+  if (user.role !== 'admin' && user.role !== 'group_admin') return <Navigate to="/dashboard" />
+  return <>{children}</>
+}
+
+function SuperAdminRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
   if (!user) return <Navigate to="/login" />
   if (user.role !== 'admin') return <Navigate to="/dashboard" />
@@ -34,9 +45,14 @@ function App() {
           <Route path="courses" element={<PrivateRoute><CourseList /></PrivateRoute>} />
           <Route path="courses/:moduleId" element={<PrivateRoute><ModuleDetail /></PrivateRoute>} />
           <Route path="lesson/:id" element={<PrivateRoute><LessonDetail /></PrivateRoute>} />
+          <Route path="articles" element={<PrivateRoute><Articles /></PrivateRoute>} />
+          <Route path="articles/:id" element={<PrivateRoute><ArticleDetail /></PrivateRoute>} />
           <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="admin/courses" element={<AdminRoute><AdminCourses /></AdminRoute>} />
-          <Route path="admin/ai-settings" element={<AdminRoute><AdminAISettings /></AdminRoute>} />
+          <Route path="admin/courses" element={<SuperAdminRoute><AdminCourses /></SuperAdminRoute>} />
+          <Route path="admin/ai-settings" element={<SuperAdminRoute><AdminAISettings /></SuperAdminRoute>} />
+          <Route path="admin/articles" element={<SuperAdminRoute><AdminArticles /></SuperAdminRoute>} />
+          <Route path="admin/articles/create" element={<SuperAdminRoute><ArticleForm /></SuperAdminRoute>} />
+          <Route path="admin/articles/edit/:id" element={<SuperAdminRoute><ArticleForm /></SuperAdminRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -11,14 +11,20 @@ export default function Layout() {
   const navItems = [
     { path: '/', label: '首页' },
     { path: '/courses', label: '课程' },
+    { path: '/articles', label: '文章' },
     { path: '/dashboard', label: '仪表盘' },
   ]
   
-  const adminNavItems = [
-    { path: '/admin', label: '管理后台' },
-    { path: '/admin/courses', label: '课程管理' },
-    { path: '/admin/ai-settings', label: 'AI设置' },
-  ]
+  const adminNavItems = user?.role === 'admin' 
+    ? [
+        { path: '/admin', label: '管理后台' },
+        { path: '/admin/courses', label: '课程管理' },
+        { path: '/admin/articles', label: '文章管理' },
+        { path: '/admin/ai-settings', label: 'AI设置' },
+      ]
+    : [
+        { path: '/admin', label: '管理后台' },
+      ]
   
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -45,7 +51,7 @@ export default function Layout() {
                     {item.label}
                   </Link>
                 ))}
-                {user?.role === 'admin' && adminNavItems.map(item => (
+                {(user?.role === 'admin' || user?.role === 'group_admin') && adminNavItems.map(item => (
                   <Link
                     key={item.path}
                     to={item.path}
