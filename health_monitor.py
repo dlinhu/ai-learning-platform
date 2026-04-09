@@ -17,13 +17,13 @@ logging.basicConfig(
 WEBSITE_URL = "https://www.fphcare.com.cn"
 CHECK_INTERVAL = 10  # 分钟
 
-# 邮件配置（需要根据实际情况修改）
+# 邮件配置
 EMAIL_CONFIG = {
-    "smtp_server": "smtp.qq.com",
+    "smtp_server": "mail.fphcare.com.cn",
     "smtp_port": 587,
-    "sender_email": "your_email@example.com",
+    "sender_email": "no-reply@mail.fphcare.com.cn",
     "sender_password": "your_email_password",
-    "receiver_email": "recipient_email@example.com"
+    "receiver_email": "dlinhu@163.com"
 }
 
 # 短信配置（需要根据实际情况修改，这里使用阿里云短信服务作为示例）
