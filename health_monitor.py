@@ -15,7 +15,7 @@ logging.basicConfig(
 
 # 配置参数
 WEBSITE_URL = "https://www.fphcare.com.cn"
-CHECK_INTERVAL = 60  # 分钟
+CHECK_INTERVAL = 10  # 分钟
 
 # 邮件配置（需要根据实际情况修改）
 EMAIL_CONFIG = {
