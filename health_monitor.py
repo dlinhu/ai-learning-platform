@@ -14,7 +14,7 @@ logging.basicConfig(
 )
 
 # 配置参数
-WEBSITE_URL = "https://www.fphcare.com.cn"
+WEBSITE_URLS = ["https://www.fphcare.com.cn", "https://admin.fphcare.com.cn"]
 CHECK_INTERVAL = 10  # 分钟
 
 # 邮件配置
@@ -68,27 +68,31 @@ def send_sms(message):
 
 def check_website_health():
     """检查网站健康度"""
-    logging.info(f"开始检查网站健康度: {WEBSITE_URL}")
+    all_healthy = True
     
-    try:
-        response = requests.get(WEBSITE_URL, timeout=30)
+    for url in WEBSITE_URLS:
+        logging.info(f"开始检查网站健康度: {url}")
         
-        if response.status_code == 200:
-            logging.info(f"网站访问正常，状态码: {response.status_code}")
-            return True
-        else:
-            error_message = f"网站访问异常，状态码: {response.status_code}"
+        try:
+            response = requests.get(url, timeout=30)
+            
+            if response.status_code == 200:
+                logging.info(f"网站 {url} 访问正常，状态码: {response.status_code}")
+            else:
+                error_message = f"网站 {url} 访问异常，状态码: {response.status_code}"
+                logging.error(error_message)
+                send_email("网站健康度警告", error_message)
+                send_sms(error_message)
+                all_healthy = False
+                
+        except requests.exceptions.RequestException as e:
+            error_message = f"网站 {url} 访问失败: {str(e)}"
             logging.error(error_message)
             send_email("网站健康度警告", error_message)
             send_sms(error_message)
-            return False
-            
-    except requests.exceptions.RequestException as e:
-        error_message = f"网站访问失败: {str(e)}"
-        logging.error(error_message)
-        send_email("网站健康度警告", error_message)
-        send_sms(error_message)
-        return False
+            all_healthy = False
+    
+    return all_healthy
 
 def main():
     """主函数"""
